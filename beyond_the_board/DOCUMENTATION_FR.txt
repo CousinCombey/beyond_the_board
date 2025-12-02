@@ -1,0 +1,539 @@
+================================================================================
+GAMES_FEN_COMPLETE.CSV - DOCUMENTATION DU JEU DE DONNÉES
+================================================================================
+
+📊 APERÇU DU JEU DE DONNÉES
+- Nombre total de parties : 242 700 parties d'échecs
+- Date : 1er octobre 2025
+- Joueurs : ELO 1000-1400 (débutant à intermédiaire)
+- Type de partie : Blitz (parties rapides, 3-15 minutes)
+- Nombre total de caractéristiques : 120 colonnes
+
+Ce jeu de données contient des parties d'échecs avec des informations détaillées sur :
+- Qui a joué et leurs niveaux de compétence
+- Comment la partie s'est déroulée (coup par coup)
+- Analyse de la position à différents stades de la partie
+- Gestion du temps pendant la partie
+- Évaluation informatique des positions (utilisant le moteur Stockfish)
+
+================================================================================
+RÉPARTITION DES CARACTÉRISTIQUES (120 colonnes)
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+1. INFORMATIONS DE BASE SUR LA PARTIE (17 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+id
+  Qu'est-ce que c'est : Numéro unique pour chaque partie (1, 2, 3, etc.)
+
+game_id
+  Qu'est-ce que c'est : ID de partie d'origine provenant de la source
+
+white
+  Qu'est-ce que c'est : Nom d'utilisateur du joueur avec les pièces blanches
+
+black
+  Qu'est-ce que c'est : Nom d'utilisateur du joueur avec les pièces noires
+
+white_elo
+  Qu'est-ce que c'est : Classement de compétence du joueur blanc (1000-1400)
+  Comment le lire : Chiffre plus élevé = joueur plus fort
+
+black_elo
+  Qu'est-ce que c'est : Classement de compétence du joueur noir (1000-1400)
+  Comment le lire : Chiffre plus élevé = joueur plus fort
+
+result
+  Qu'est-ce que c'est : Qui a gagné la partie
+  Valeurs : "1-0" (Blanc a gagné), "0-1" (Noir a gagné), "1/2-1/2" (Match nul)
+
+date
+  Qu'est-ce que c'est : Quand la partie a été jouée (toutes les parties : 2025-10-01)
+
+time
+  Qu'est-ce que c'est : Heure de la journée où la partie a été jouée (format : HH:MM:SS)
+
+opening
+  Qu'est-ce que c'est : Nom de la stratégie d'ouverture utilisée
+  Exemple : "Sicilian Defense", "King's Gambit"
+
+eco
+  Qu'est-ce que c'est : Code de l'ouverture (Lettre + 2 chiffres, comme "C30")
+  Comment ça marche : Les lettres A-E regroupent des ouvertures similaires
+
+time_control
+  Qu'est-ce que c'est : Format de limite de temps (temps de base + secondes supplémentaires par coup)
+  Exemple : "180+2" signifie 3 minutes + 2 secondes ajoutées par coup
+
+termination
+  Qu'est-ce que c'est : Comment la partie s'est terminée
+  Valeurs : "Normal" (échec et mat/abandon), "Time forfeit" (temps écoulé),
+          "Abandoned" (déconnexion)
+
+num_moves
+  Qu'est-ce que c'est : Nombre total de coups dans la partie (les deux joueurs combinés)
+  Moyenne : Environ 61 coups
+
+game_url
+  Qu'est-ce que c'est : Lien pour regarder la partie sur lichess.org
+
+moves
+  Qu'est-ce que c'est : Liste complète de tous les coups de la partie
+  Format : "e2e4 e7e5" (de la case à la case)
+
+────────────────────────────────────────────────────────────────────────────────
+2. CARACTÉRISTIQUES DE FORCE DES JOUEURS (3 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+elo_avg
+  Qu'est-ce que c'est : Niveau de compétence moyen des deux joueurs
+  Comment c'est calculé : (white_elo + black_elo) ÷ 2
+  Objectif : Montre la qualité globale de la partie
+
+elo_diff
+  Qu'est-ce que c'est : Différence de compétence entre les joueurs
+  Comment c'est calculé : white_elo - black_elo
+  Comment le lire : Positif = Blanc plus fort, Négatif = Noir plus fort, 0 = Égal
+
+elo_mismatch
+  Qu'est-ce que c'est : Indicateur pour parties déséquilibrées
+  Valeurs : 1 si écart de compétence > 200 points, sinon 0
+  Objectif : Identifie les confrontations inéquitables
+
+────────────────────────────────────────────────────────────────────────────────
+3. CARACTÉRISTIQUES D'OUVERTURE (5 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+eco_letter
+  Qu'est-ce que c'est : Famille d'ouverture (convertie en nombre 0-4)
+  Valeurs : 0=A (Flanc), 1=B (Semi-ouverte), 2=C (Ouverte), 3=D (Fermée), 4=E (Indienne)
+
+eco_number
+  Qu'est-ce que c'est : Variation spécifique de l'ouverture (0-99)
+  Exemple : Pour "C30", ce serait 30
+
+opening_aggressive
+  Qu'est-ce que c'est : L'ouverture est-elle agressive ?
+  Valeurs : 1 si le nom de l'ouverture contient "gambit" ou "attack", sinon 0
+
+opening_solid
+  Qu'est-ce que c'est : L'ouverture est-elle défensive ?
+  Valeurs : 1 si le nom de l'ouverture contient "defense" ou "defence", sinon 0
+
+opening_sicilian
+  Qu'est-ce que c'est : Est-ce la Défense Sicilienne ?
+  Valeurs : 1 si l'ouverture est Sicilienne, sinon 0
+  Note : La Sicilienne est la réponse la plus populaire à 1.e4
+
+────────────────────────────────────────────────────────────────────────────────
+4. CARACTÉRISTIQUES DE CONTRÔLE DU TEMPS (4 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+time_base
+  Qu'est-ce que c'est : Temps de départ par joueur en secondes
+  Exemple : 180 = 3 minutes
+
+time_increment
+  Qu'est-ce que c'est : Secondes bonus ajoutées après chaque coup
+  Exemple : 2 = 2 secondes supplémentaires par coup
+
+est_game_minutes
+  Qu'est-ce que c'est : Durée totale estimée de la partie
+  Comment c'est calculé : (time_base + time_increment × 40) ÷ 60
+  Note : Suppose 40 coups par joueur
+
+time_category
+  Qu'est-ce que c'est : Catégorie de vitesse
+  Valeurs : 0=Bullet (<3 min), 1=Blitz (3-15 min), 2=Rapide (>15 min)
+
+────────────────────────────────────────────────────────────────────────────────
+5. CARACTÉRISTIQUES DE RÉSULTAT DE LA PARTIE (5 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+num_moves.1
+  Qu'est-ce que c'est : Coups totaux (doublon du num_moves précédent)
+
+moves_per_min
+  Qu'est-ce que c'est : Vitesse de la partie
+  Comment c'est calculé : num_moves ÷ est_game_minutes
+  Comment le lire : Plus élevé = jeu plus rapide
+
+white_won
+  Qu'est-ce que c'est : Est-ce que le blanc a gagné ?
+  Valeurs : 1 si le blanc a gagné, 0 sinon
+
+draw
+  Qu'est-ce que c'est : Était-ce un match nul ?
+  Valeurs : 1 si match nul, 0 si quelqu'un a gagné
+
+term_checkmate
+  Qu'est-ce que c'est : La partie s'est-elle terminée par échec et mat ?
+  Valeurs : 1 si échec et mat, 0 sinon
+
+────────────────────────────────────────────────────────────────────────────────
+6. MODÈLES DE COUPS (5 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+first_capture_move
+  Qu'est-ce que c'est : Quand la première pièce a-t-elle été capturée ?
+  Valeurs : Numéro du coup (0 si aucune capture dans les 40 premiers coups)
+  Comment le lire : Bas = combat précoce, Élevé = ouverture calme
+
+castling_diff
+  Qu'est-ce que c'est : Différence dans le timing du roque
+  Comment c'est calculé : Nombre de coups entre les roques des joueurs
+  Comment le lire : 0 = timing similaire, Plus élevé = un a retardé beaucoup plus longtemps
+
+early_trades
+  Qu'est-ce que c'est : Combien de captures dans les 20 premiers coups
+  Comment le lire : 0-2 = Calme, 3-5 = Un peu d'action, 6+ = Très tactique
+
+move_diversity
+  Qu'est-ce que c'est : À quel point les coups étaient-ils créatifs/variés ?
+  Comment c'est calculé : Coups uniques ÷ coups totaux (30 premiers)
+  Plage : 0,0 à 1,0 (1,0 = tous les coups différents)
+
+checks_count
+  Qu'est-ce que c'est : Combien d'échecs dans les 40 premiers coups
+  Comment le lire : 0-2 = Calme, 3-5 = Un peu de pression, 6+ = Agressif
+
+────────────────────────────────────────────────────────────────────────────────
+7. POSITION AU COUP 20 - MATÉRIEL (3 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+material_balance
+  Qu'est-ce que c'est : Qui est en avance en pièces au coup 20 ?
+  Comment c'est calculé : Matériel du Blanc - Matériel du Noir
+  Valeurs des points : Pion=1, Cavalier/Fou=3, Tour/Dame=5
+  Comment le lire : Positif = Blanc en avance, Négatif = Noir en avance, 0 = Égal
+
+total_pieces
+  Qu'est-ce que c'est : Total des pièces sur l'échiquier (hors rois)
+  Comment le lire : 30 = La plupart des pièces encore présentes, 20 = Beaucoup échangées
+
+white_pawns, black_pawns
+  Qu'est-ce que c'est : Nombre de pions de chaque côté au coup 20
+  Plage : Généralement 6-8
+
+white_minor, black_minor
+  Qu'est-ce que c'est : Cavaliers + Fous de chaque côté
+  Plage : Généralement 3-4 au coup 20
+
+white_major, black_major
+  Qu'est-ce que c'est : Tours + Dames de chaque côté
+  Plage : Généralement 2-3 au coup 20
+
+────────────────────────────────────────────────────────────────────────────────
+8. POSITION AU COUP 20 - SÉCURITÉ DU ROI (2 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+white_castled
+  Qu'est-ce que c'est : Le blanc a-t-il roqué ?
+  Valeurs : 1 si roqué, 0 sinon
+
+black_castled
+  Qu'est-ce que c'est : Le noir a-t-il roqué ?
+  Valeurs : 1 si roqué, 0 sinon
+
+────────────────────────────────────────────────────────────────────────────────
+9. POSITION AU COUP 20 - DÉVELOPPEMENT (2 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+development_white
+  Qu'est-ce que c'est : Combien de cavaliers/fous déplacés de leurs cases de départ
+  Plage : 0-4 (4 = toutes les pièces mineures développées)
+  Comment le lire : Plus élevé = meilleur développement
+
+development_black
+  Qu'est-ce que c'est : Pareil pour le noir
+  Plage : 0-4
+
+────────────────────────────────────────────────────────────────────────────────
+10. POSITION AU COUP 20 - CONTRÔLE DU CENTRE (2 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+center_pawns_white
+  Qu'est-ce que c'est : Pions blancs dans les cases centrales (d4, d5, e4, e5)
+  Plage : Généralement 0-2
+  Comment le lire : Plus = centre plus fort
+
+center_pawns_black
+  Qu'est-ce que c'est : Pions noirs dans le centre
+  Plage : Généralement 0-2
+
+────────────────────────────────────────────────────────────────────────────────
+11. POSITION AU COUP 20 - FAIBLESSES DE PIONS (4 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+doubled_pawns_white
+  Qu'est-ce que c'est : Nombre de colonnes avec 2+ pions blancs (faiblesse)
+  Plage : Généralement 0-1
+  Comment le lire : Plus élevé = pire structure
+
+doubled_pawns_black
+  Qu'est-ce que c'est : Pareil pour le noir
+  Plage : Généralement 0-1
+
+isolated_pawns_white
+  Qu'est-ce que c'est : Pions blancs sans pions amis à côté d'eux
+  Plage : Généralement 0-2
+  Comment le lire : Plus élevé = plus de faiblesses
+
+isolated_pawns_black
+  Qu'est-ce que c'est : Pareil pour le noir
+  Plage : Généralement 0-2
+
+────────────────────────────────────────────────────────────────────────────────
+12. POSITION AU COUP 20 - FORCES DE PIONS (2 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+passed_pawns_white
+  Qu'est-ce que c'est : Pions blancs avec chemin dégagé vers la promotion (force)
+  Plage : Généralement 0-2 au coup 20
+  Comment le lire : Plus élevé = position plus forte
+
+passed_pawns_black
+  Qu'est-ce que c'est : Pareil pour le noir
+  Plage : Généralement 0-2
+
+────────────────────────────────────────────────────────────────────────────────
+13. POSITION AU COUP 20 - MOBILITÉ (3 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+mobility_white
+  Qu'est-ce que c'est : Combien de coups légaux le blanc a
+  Plage : Généralement 20-50
+  Comment le lire : Plus élevé = position plus active
+
+mobility_black
+  Qu'est-ce que c'est : Combien de coups légaux le noir a
+  Plage : Généralement 20-50
+
+space_control
+  Qu'est-ce que c'est : Qui contrôle plus d'espace ?
+  Comment c'est calculé : Différence dans l'avancement des pions
+  Comment le lire : Positif = Blanc plus d'espace, Négatif = Noir plus d'espace
+
+────────────────────────────────────────────────────────────────────────────────
+14. CARACTÉRISTIQUES STRATÉGIQUES DÉRIVÉES (5 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+material_elo_match
+  Qu'est-ce que c'est : Le joueur le plus fort est-il en train de gagner ?
+  Valeurs : 1 si le joueur le plus fort (par ELO) est en avance en matériel, 0 sinon
+  Comment le lire : 1 = se déroule comme prévu, 0 = surprise en cours
+
+development_edge
+  Qu'est-ce que c'est : Avantage de développement
+  Comment c'est calculé : development_white - development_black
+  Comment le lire : Positif = Blanc en avance, Négatif = Noir en avance
+
+king_safety_gap
+  Qu'est-ce que c'est : Quel roi est plus en sécurité ?
+  Comment c'est calculé : white_castled - black_castled
+  Valeurs : +1 (Blanc plus sûr), -1 (Noir plus sûr), 0 (Égal)
+
+pawn_quality_diff
+  Qu'est-ce que c'est : Avantage global de structure de pions
+  Comment c'est calculé : (blanc passé - blanc isolé) - (noir passé - noir isolé)
+  Comment le lire : Positif = Blanc meilleur, Négatif = Noir meilleur
+
+position_complexity
+  Qu'est-ce que c'est : À quel point la position est-elle compliquée ?
+  Comment c'est calculé : total_pieces + abs(material_balance) + checks_count
+  Comment le lire : Plus élevé = plus complexe/tactique
+
+────────────────────────────────────────────────────────────────────────────────
+15. CARACTÉRISTIQUES DE TEMPS RESTANT (5 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+white_time_remaining
+  Qu'est-ce que c'est : Secondes restantes sur l'horloge du blanc à la fin du jeu
+  Plage : 0 au temps de départ
+  Exemple : 145,5 = 2 minutes 25 secondes restantes
+  Note : 0 = temps écoulé
+
+black_time_remaining
+  Qu'est-ce que c'est : Secondes restantes sur l'horloge du noir à la fin du jeu
+  Plage : 0 au temps de départ
+
+time_advantage
+  Qu'est-ce que c'est : Différence de temps à la fin du jeu
+  Comment c'est calculé : white_time_remaining - black_time_remaining
+  Comment le lire : Positif = Blanc plus de temps, Négatif = Noir plus de temps
+
+time_pressure_white
+  Qu'est-ce que c'est : Le blanc était-il en grave pénurie de temps ?
+  Valeurs : 1 si moins de 10 secondes restantes, 0 sinon
+
+time_pressure_black
+  Qu'est-ce que c'est : Le noir était-il en grave pénurie de temps ?
+  Valeurs : 1 si moins de 10 secondes restantes, 0 sinon
+
+────────────────────────────────────────────────────────────────────────────────
+16. ÉVALUATIONS STOCKFISH (10 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+Celles-ci montrent l'analyse informatique de la position à différents stades du jeu.
+Toutes les valeurs sont du point de vue du blanc (positif = bon pour le blanc).
+
+stockfish_opening (Coup 5)
+  Qu'est-ce que c'est : Évaluation informatique dans l'ouverture
+  Plage : -10,0 à +10,0 (en unités de pion)
+  Comment le lire : +2,0 = Blanc en avance de 2 pions de valeur
+
+stockfish_early (Coup 8)
+  Qu'est-ce que c'est : Évaluation en début de partie
+
+stockfish_developing (Coup 12)
+  Qu'est-ce que c'est : Évaluation pendant la phase de développement
+
+stockfish_pre_mid (Coup 16)
+  Qu'est-ce que c'est : Évaluation avant le milieu de partie
+
+stockfish_midgame (Coup 20)
+  Qu'est-ce que c'est : Évaluation au pic de complexité
+  Exemple : +2,5 = Blanc gagne, -1,2 = Noir légèrement meilleur, 0,0 = Égal
+
+stockfish_post_mid (Coup 24)
+  Qu'est-ce que c'est : Évaluation après le pic du milieu de partie
+
+stockfish_transition (Coup 28)
+  Qu'est-ce que c'est : Évaluation pendant la transition vers la finale
+
+stockfish_late (Coup 32)
+  Qu'est-ce que c'est : Évaluation dans les positions simplifiées
+
+stockfish_pre_end (Coup 36)
+  Qu'est-ce que c'est : Évaluation approchant la finale
+
+stockfish_endgame (Position finale)
+  Qu'est-ce que c'est : Évaluation de la position finale
+  Exemple : +7,8 = Blanc a gagné de manière décisive, -10,0 = Noir échec et mat
+
+Comment interpréter toutes les valeurs Stockfish :
+  +3,0 ou plus = Avantage gagnant pour le blanc
+  -3,0 ou moins = Avantage gagnant pour le noir
+  -1,0 à +1,0 = Position à peu près égale
+  +10,0 ou -10,0 = Échec et mat
+
+────────────────────────────────────────────────────────────────────────────────
+17. POSITIONS FEN (40 colonnes)
+────────────────────────────────────────────────────────────────────────────────
+
+Les chaînes FEN (Notation Forsyth-Edwards) représentent la position exacte de l'échiquier.
+Il y a 40 colonnes FEN capturant les positions à 10 stades différents du jeu :
+
+Pour chaque stade (opening, early, developing, pre_mid, midgame, post_mid,
+transition, late, pre_end, endgame), il y a 4 colonnes :
+
+fen_[stage]_white
+  Qu'est-ce que c'est : Position de l'échiquier quand le blanc est sur le point de jouer
+  Format : Notation d'échecs spéciale décrivant toutes les pièces
+  Exemple : "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+fen_[stage]_black
+  Qu'est-ce que c'est : Position de l'échiquier quand le noir est sur le point de jouer
+
+move_[stage]_white
+  Qu'est-ce que c'est : À quel coup correspond cette position (tour du blanc)
+
+move_[stage]_black
+  Qu'est-ce que c'est : À quel coup correspond cette position (tour du noir)
+
+Objectif des chaînes FEN :
+- Recréer les positions exactes de l'échiquier
+- Alimenter les réseaux neuronaux pour l'analyse de position
+- Visualiser les positions en utilisant un logiciel d'échecs
+- Analyser avec des moteurs d'échecs
+
+Les 10 stades capturés :
+1. opening (autour du coup 5)
+2. early (autour du coup 8)
+3. developing (autour du coup 12)
+4. pre_mid (autour du coup 16)
+5. midgame (autour du coup 20)
+6. post_mid (autour du coup 24)
+7. transition (autour du coup 28)
+8. late (autour du coup 32)
+9. pre_end (autour du coup 36)
+10. endgame (position finale)
+
+================================================================================
+RÉFÉRENCE RAPIDE - NOMBRE DE CARACTÉRISTIQUES PAR CATÉGORIE
+================================================================================
+
+Informations de base : 17 colonnes
+Force des joueurs : 3 colonnes
+Caractéristiques d'ouverture : 5 colonnes
+Contrôle du temps : 4 colonnes
+Résultat de la partie : 5 colonnes
+Modèles de coups : 5 colonnes
+Matériel de position : 9 colonnes
+Sécurité du roi : 2 colonnes
+Développement : 2 colonnes
+Contrôle du centre : 2 colonnes
+Structure de pions : 6 colonnes
+Mobilité : 3 colonnes
+Caractéristiques stratégiques : 5 colonnes
+Temps restant : 5 colonnes
+Analyse Stockfish : 10 colonnes
+Positions FEN : 40 colonnes
+─────────────────────────────
+TOTAL : 120 colonnes
+
+================================================================================
+INFORMATIONS SUR LA QUALITÉ DES DONNÉES
+================================================================================
+
+✓ Jeu de données complet : Aucune valeur manquante
+✓ Date unique : Toutes les parties du 1er octobre 2025
+✓ ELO filtré : Uniquement les joueurs avec un classement de 1000-1400
+✓ Blitz uniquement : Parties rapides (3-15 minutes)
+✓ Données propres : Parties invalides supprimées
+✓ Longueur raisonnable : Uniquement les parties avec 20-300 coups incluses
+
+Résultats des parties :
+- Victoires du blanc : 50,1% (121 673 parties)
+- Victoires du noir : 46,3% (112 582 parties)
+- Matchs nuls : 3,6% (8 756 parties)
+
+================================================================================
+CAS D'UTILISATION COURANTS
+================================================================================
+
+🎯 PRÉDIRE LES RÉSULTATS DES PARTIES
+Utiliser : caractéristiques elo, caractéristiques d'ouverture, caractéristiques de position, stockfish_midgame
+Inclure : time_pressure et time_advantage (important en blitz)
+
+♟️ ANALYSER LES POSITIONS
+Utiliser : Toutes les caractéristiques de position du coup 20
+Utiliser : Chaînes FEN pour visualiser les positions
+Utiliser : Évaluations Stockfish pour voir qui gagne
+
+⏱️ ANALYSE DE LA GESTION DU TEMPS
+Utiliser : time_remaining, time_pressure, time_advantage
+Utiliser : moves_per_min pour voir la vitesse du jeu
+Comparer : termination pour voir si le temps s'est écoulé
+
+📊 ANALYSE DES OUVERTURES
+Utiliser : caractéristiques eco, classifications d'ouverture
+Utiliser : stockfish_opening et stockfish_early pour la qualité
+Utiliser : early_trades et first_capture_move pour le style
+
+🎮 TRAJECTOIRE DE LA PARTIE
+Utiliser : Toutes les 10 évaluations stockfish
+Calculer : Changements entre les stades pour trouver les erreurs
+Exemple : stockfish_midgame - stockfish_opening = comment l'avantage a changé
+
+🤖 CONSEILS D'APPRENTISSAGE AUTOMATIQUE
+Variables cibles : white_won, draw, result, stockfish_endgame
+Caractéristiques importantes : Évaluations Stockfish, material_balance, elo_diff, time_pressure
+Déséquilibré : Les matchs nuls ne représentent que 3,6% (peut nécessiter un traitement spécial)
+Mise à l'échelle des caractéristiques : Normaliser les caractéristiques de position et de temps
+Chaînes FEN : Peuvent être utilisées avec des réseaux neuronaux pour des modèles avancés
+
+================================================================================
+FIN DE LA DOCUMENTATION
+================================================================================
