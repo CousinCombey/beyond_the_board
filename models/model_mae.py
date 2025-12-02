@@ -31,3 +31,5 @@ def initial_models(X, y):
             epochs=100,
             validation_split=0.2,
             callbacks=[es])
+
+    return model, X_test, y_test
