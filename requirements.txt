@@ -8,3 +8,5 @@ cairosvg
 matplotlib>=3.7.0
 jupyter>=1.0.0
 ipykernel>=6.25.0
+chess
+
