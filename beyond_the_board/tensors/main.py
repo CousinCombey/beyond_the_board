@@ -1,7 +1,6 @@
 # function that can transform a FEN string in a tensor object of shape (8, 8)
 
 import chess
-import torch
 import numpy as np
 
 
