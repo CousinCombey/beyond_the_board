@@ -16,13 +16,10 @@ def create_new_df(df):
     for stage in stages:
 
         white = df[f"fen_{stage}_white"].reset_index(drop=True)
-        black = df[f"fen_{stage}_black"].reset_index(drop=True)
-        all_ = pd.concat([white, black], ignore_index=True)
 
         stockfish = df[f"stockfish_{stage}"].reset_index(drop=True)
-        stockfish = pd.concat([stockfish, stockfish], ignore_index=True)
 
-        new_df_stage = pd.DataFrame({"FEN": all_, "Stockfish": stockfish})
+        new_df_stage = pd.DataFrame({"FEN": white, "Stockfish": stockfish})
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
 
