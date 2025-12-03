@@ -68,6 +68,8 @@ drafts/notebooks/*.ipynb
 drafts/scripts/*.ipynb
 drafts/notebooks/*.py
 drafts/scripts/*.py
+beyond_the_board/notebooks/*.ipynb
+beyond_the_board/*.ipynb
 raw_data
 raw_data/*
 # But not these directories themselves
