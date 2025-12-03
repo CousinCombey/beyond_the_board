@@ -1,3 +1,12 @@
+import chess
+import chess.svg
+import cairosvg
+import io
+from PIL import Image
+from IPython.display import display, SVG, clear_output
+import ipywidgets as widgets
+
+
 def svg_to_image(svg_data):
     """
     Convert SVG string to PIL Image for saving as PNG.
