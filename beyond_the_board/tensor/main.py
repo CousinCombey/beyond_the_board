@@ -87,11 +87,68 @@ def fen_to_tensor_8_8_12(fen):
     return tensor
 
 
+def fen_to_tensor_8_8_13(fen):
+
+    """Convert a FEN string to a tensor representation of the chess board.
+
+    Args:
+        fen (str): The FEN string representing the chess board.
+
+    Returns:
+        torch.Tensor: A tensor of shape (8, 8, 13) representing the chess board.
+                        Each piece is represented by an integer code.
+                        and the last channel the player
+    """
+
+    piece_to_channel = {
+            'p': 0,  # Black pawn
+            'n': 1,  # Black knight
+            'b': 2,  # Black bishop
+            'r': 3,  # Black rook
+            'q': 4,  # Black queen
+            'k': 5,  # Black king
+            'P': 6,  # White pawn
+            'N': 7,  # White knight
+            'B': 8,  # White bishop
+            'R': 9,  # White rook
+            'Q': 10, # White queen
+            'K': 11, # White king
+        }
+
+    # Get piece placement (first part of FEN)
+    pieces = fen.split(" ")[0]
+    rows = pieces.split("/")
+
+    # Deuxième partie du FEN > Joueur qui doit joueer
+    player = fen.split(" ")[1] # 'w' ou 'b'
+
+    tensor = np.zeros((8, 8, 13), dtype=np.uint8)
+
+    for i, row in enumerate(rows):
+        col = 0
+        for char in row:
+            if char.isdigit():
+                # Empty squares - skip ahead
+                col += int(char)
+            else:
+                # Place piece in corresponding channel
+                channel = piece_to_channel[char]
+                tensor[i, col, channel] = 1.0
+                col += 1
+
+    if player =='w' :
+        tensor[:,:,12] = 1
+
+
+    return tensor
+
+
 if __name__ == '__main__':
     # Example usage
     fen = "r1bqkbnr/pppppppp/n7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     tensor_8_8 = fen_to_tensor_8_8(fen)
     tensor_8_8_12 = fen_to_tensor_8_8_12(fen)
+    tensor_8_8_13 = fen_to_tensor_8_8_13(fen)
     print("Tensor (8, 8):")
     print(tensor_8_8)
     print("\nTensor (8, 8, 12):")
