@@ -1,4 +1,4 @@
-from tensor.main import fen_to_tensor_8_8_12
+from beyond_the_board.tensor.main import fen_to_tensor_8_8_12
 from keras import Sequential, Input, layers
 from sklearn.model_selection import train_test_split
 import numpy as np
