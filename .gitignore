@@ -89,6 +89,7 @@ notebooks/*
 .h5
 #Env variable for Docker
 .env.yaml
+.envrc
 #Env variable for Streamlit
 app/.streamlit/secrets.toml
 .streamlit/secrets.toml
