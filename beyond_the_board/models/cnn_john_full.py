@@ -1,8 +1,16 @@
 """
-CNN Model for Chess Position Evaluation
+CNN Model for Chess Position Evaluation - FULL VERSION WITH METADATA FEATURES
 
 This module provides a complete pipeline for training and using a Convolutional Neural Network
-to evaluate chess positions from FEN strings.
+to evaluate chess positions from FEN strings, INCLUDING 15 metadata features.
+
+DIFFERENCE FROM cnn_john.py:
+    - input_2 now uses 15 REAL features (not zeros):
+        * turn_enc (1 feature)
+        * castling rights (4 features)
+        * en passant one-hot (8 features)
+        * halfmove_norm (1 feature)
+        * fullmove_norm (1 feature)
 
 Configuration:
     All hyperparameters are centralized in params.py and loaded from .env file:
@@ -15,10 +23,10 @@ Configuration:
     - EARLY_STOPPING_PATIENCE: Epochs to wait before stopping if no improvement
 
 Usage:
-    from beyond_the_board.models.cnn_john import complete_workflow_example
+    from beyond_the_board.models.cnn_john_full import complete_workflow_example
     import pandas as pd
 
-    df = pd.read_csv('your_data.csv')
+    df = pd.read_csv('your_data.csv')  # Must contain FEN column + 15 metadata columns
     trained_model = complete_workflow_example(df)
 """
 
@@ -60,12 +68,13 @@ def print_model_config():
 
 # ------------- Initialize Model ----------------
 
-def initialize_model_cnn_john():
+def initialize_model_cnn_john_full():
     """
-    Initialize the CNN model with the architecture specified in the workflow diagram.
+    Initialize the CNN model with FULL metadata features (15 instead of 8 dummy zeros).
 
     Architecture:
-    - Input: (None, 8, 8, 12) chess board tensor (12 channels for 12 piece types)
+    - Input 1: (None, 8, 8, 12) chess board tensor (12 channels for 12 piece types)
+    - Input 2: (None, 15) metadata features from FEN (turn, castling, en passant, halfmove, fullmove)
     - Multiple convolutional blocks with batch normalization
     - Skip connections via concatenation layers
     - Dense layers for final evaluation
@@ -101,9 +110,9 @@ def initialize_model_cnn_john():
     # Flatten convolutional output
     flatten = layers.Flatten(name='flatten')(skip_3)
 
-    # Secondary input: additional features (8-dimensional)
-    input_2 = Input(shape=(8,), name='input_2')
-    dense_input_2 = layers.Dense(8, activation='relu', name='dense')(input_2)
+    # Secondary input: 15 metadata features (CHANGED FROM 8!)
+    input_2 = Input(shape=(15,), name='input_2')
+    dense_input_2 = layers.Dense(15, activation='relu', name='dense')(input_2)
 
     # Combine both inputs
     combined = layers.Concatenate(name='concatenate_3')([flatten, dense_input_2])
@@ -116,7 +125,7 @@ def initialize_model_cnn_john():
     model = Model(
         inputs=[input_1, input_2],
         outputs=output,
-        name='chess_cnn'
+        name='chess_cnn_full'
     )
 
     # Compile model
@@ -130,7 +139,7 @@ def initialize_model_cnn_john():
 
 # ------------- Prepare Data ----------------
 
-def prepare_data(df, fen_column, target_column, limit_data=True):
+def prepare_data(df, fen_column, target_column, metadata_columns=None, limit_data=True):
     """
     Prepare features (X) and target (y) from DataFrame.
 
@@ -138,6 +147,7 @@ def prepare_data(df, fen_column, target_column, limit_data=True):
         df (pd.DataFrame): Input DataFrame with chess positions and evaluations
         fen_column (str): Name of column containing FEN strings (default: 'FEN')
         target_column (str): Name of column containing evaluation scores (default: 'Evaluation')
+        metadata_columns (list): List of metadata column names to include in X (optional)
         limit_data (bool): Whether to apply DATA_SIZE limit from params (default: True)
 
     Returns:
@@ -150,7 +160,12 @@ def prepare_data(df, fen_column, target_column, limit_data=True):
             df = df.head(data_limit)
             print(f"Data limited to {data_limit} rows (DATA_SIZE={DATA_SIZE})")
 
-    X = df[[fen_column]]
+    # Select columns for X
+    if metadata_columns is not None:
+        X = df[[fen_column] + metadata_columns]
+    else:
+        X = df[[fen_column]]
+
     y = df[target_column]
 
     return X, y
@@ -229,42 +244,47 @@ def prepare_arrays_for_model(X_train_tensors, X_test_tensors, y_train, y_test):
 
 # ------------- Create Secondary Input ----------------
 
-def create_secondary_input(X_train_arr, X_test_arr):
+def create_secondary_input(X_train, X_test, metadata_columns):
     """
-    Create secondary input features for the model.
+    Create secondary input features for the model using REAL metadata from DataFrame.
 
-    The model expects two inputs: the main chess board tensor and secondary features.
-    This function creates dummy secondary features (can be extended with real features).
+    The 15 metadata columns are:
+    - turn_enc (1)
+    - white_king_castling, white_queen_castling, black_king_castling, black_queen_castling (4)
+    - ep_a, ep_b, ep_c, ep_d, ep_e, ep_f, ep_g, ep_h (8)
+    - halfmove_norm, fullmove_norm (2)
 
     Args:
-        X_train_arr (np.ndarray): Training board tensors
-        X_test_arr (np.ndarray): Testing board tensors
+        X_train (pd.DataFrame): Training features with metadata columns
+        X_test (pd.DataFrame): Testing features with metadata columns
+        metadata_columns (list): List of 15 column names containing metadata
 
     Returns:
-        tuple: (X_train_input2, X_test_input2) - secondary input arrays
+        tuple: (X_train_input2, X_test_input2) - secondary input arrays of shape (n, 15)
     """
 
-    X_train_input2 = np.zeros((X_train_arr.shape[0], 8), dtype='float32')
-    X_test_input2 = np.zeros((X_test_arr.shape[0], 8), dtype='float32')
+    X_train_input2 = X_train[metadata_columns].values.astype('float32')
+    X_test_input2 = X_test[metadata_columns].values.astype('float32')
 
     return X_train_input2, X_test_input2
 
 # ------------- Clean Input Model ----------------
 
-def clean_input_model(X, y, fen_column):
+def clean_input_model(X, y, fen_column, metadata_columns):
     """
-    Complete data preprocessing pipeline for model training.
+    Complete data preprocessing pipeline for model training with FULL metadata features.
 
     Orchestrates all preprocessing steps:
     1. Train-test split
     2. FEN to tensor conversion
     3. Array preparation
-    4. Secondary input creation
+    4. Secondary input creation from metadata columns
 
     Args:
-        X (pd.DataFrame): Features (FEN strings)
+        X (pd.DataFrame): Features (FEN strings + metadata columns)
         y (pd.Series): Target values (evaluation scores)
-        fen_column (str): Name of FEN column in X (default: 'FEN')
+        fen_column (str): Name of FEN column in X
+        metadata_columns (list): List of 15 metadata column names
 
     Returns:
         tuple: (X_train_inputs, X_test_inputs, y_train_arr, y_test_arr)
@@ -281,8 +301,8 @@ def clean_input_model(X, y, fen_column):
         X_train_tensors, X_test_tensors, y_train, y_test
     )
 
-    # Step 4: Create secondary input features
-    X_train_input2, X_test_input2 = create_secondary_input(X_train_arr, X_test_arr)
+    # Step 4: Create secondary input features from metadata columns
+    X_train_input2, X_test_input2 = create_secondary_input(X_train, X_test, metadata_columns)
 
     # Combine inputs for multi-input model
     X_train_inputs = [X_train_arr, X_train_input2]
@@ -292,7 +312,7 @@ def clean_input_model(X, y, fen_column):
 
 # ------------- Train Model ----------------
 
-def train_model(model, X, y, fen_column, validation_split=None, epochs=None, batch_size=None, patience=None):
+def train_model(model, X, y, fen_column, metadata_columns, validation_split=None, epochs=None, batch_size=None, patience=None):
     """
     Train the CNN model on chess position data using params from .env
 
@@ -300,9 +320,10 @@ def train_model(model, X, y, fen_column, validation_split=None, epochs=None, bat
 
     Args:
         model (keras.Model): Initialized CNN model
-        X (pd.DataFrame): Features (FEN strings)
+        X (pd.DataFrame): Features (FEN strings + metadata columns)
         y (pd.Series): Target values (evaluation scores)
-        fen_column (str): Name of FEN column in X (default: 'FEN')
+        fen_column (str): Name of FEN column in X
+        metadata_columns (list): List of 15 metadata column names
         validation_split (float): Fraction of training data to use for validation (defaults to VALIDATION_SIZE from params)
         epochs (int): Maximum number of training epochs (defaults to MAX_EPOCHS from params)
         batch_size (int): Number of samples per gradient update (defaults to BATCH_SIZE from params)
@@ -321,7 +342,7 @@ def train_model(model, X, y, fen_column, validation_split=None, epochs=None, bat
     if patience is None:
         patience = EARLY_STOPPING_PATIENCE
     # Prepare data for training
-    X_train_inputs, _, y_train_arr, _ = clean_input_model(X, y, fen_column)
+    X_train_inputs, _, y_train_arr, _ = clean_input_model(X, y, fen_column, metadata_columns)
 
     # Early stopping callback: stops training when validation loss stops improving
     # restore_best_weights: restores model weights from epoch with best validation loss
@@ -348,21 +369,22 @@ def train_model(model, X, y, fen_column, validation_split=None, epochs=None, bat
 
 # ------------- Evaluate Model ----------------
 
-def evaluate_model(model, X, y, fen_column):
+def evaluate_model(model, X, y, fen_column, metadata_columns):
     """
     Evaluate model performance on test data.
 
     Args:
         model (keras.Model): Trained model
-        X (pd.DataFrame): Features (FEN strings)
+        X (pd.DataFrame): Features (FEN strings + metadata columns)
         y (pd.Series): Target values (evaluation scores)
-        fen_column (str): Name of FEN column in X (default: 'FEN')
+        fen_column (str): Name of FEN column in X
+        metadata_columns (list): List of 15 metadata column names
 
     Returns:
         dict: Dictionary containing evaluation metrics (loss, mae)
     """
     # Prepare test data
-    _, X_test_inputs, _, y_test_arr = clean_input_model(X, y, fen_column)
+    _, X_test_inputs, _, y_test_arr = clean_input_model(X, y, fen_column, metadata_columns)
 
     # Evaluate on test set
     test_loss, test_mae = model.evaluate(X_test_inputs, y_test_arr, verbose=0)
@@ -381,7 +403,7 @@ def evaluate_model(model, X, y, fen_column):
 
 # ------------- Single prediction ----------------
 
-def prepare_single_prediction(fen):
+def prepare_single_prediction(fen, metadata_array):
     """
     Prepare a single FEN string for model prediction.
 
@@ -389,6 +411,7 @@ def prepare_single_prediction(fen):
 
     Args:
         fen (str): FEN string representing chess position
+        metadata_array (np.ndarray or list): Array of 15 metadata features
 
     Returns:
         list: [board_tensor, secondary_features] ready for model prediction
@@ -399,26 +422,27 @@ def prepare_single_prediction(fen):
     # Add batch dimension: (8, 8, 12) -> (1, 8, 8, 12)
     fen_tensor_arr = np.expand_dims(fen_tensor.astype('float32'), axis=0)
 
-    # Create secondary input (dummy features for now)
-    secondary_input = np.zeros((1, 8), dtype='float32')
+    # Create secondary input (15 features)
+    secondary_input = np.array([metadata_array], dtype='float32')
 
     return [fen_tensor_arr, secondary_input]
 
 # ------------- Model prediction ----------------
 
-def model_predict(model, fen):
+def model_predict(model, fen, metadata_array):
     """
     Predict evaluation score for a chess position.
 
     Args:
         model (keras.Model): Trained model
         fen (str): FEN string representing chess position
+        metadata_array (np.ndarray or list): Array of 15 metadata features
 
     Returns:
         float: Predicted evaluation score
     """
     # Prepare input data
-    model_inputs = prepare_single_prediction(fen)
+    model_inputs = prepare_single_prediction(fen, metadata_array)
 
     # Make prediction
     prediction = model.predict(model_inputs, verbose=0)
@@ -428,7 +452,7 @@ def model_predict(model, fen):
 
 # ------------- batch prediction ----------------
 
-def batch_predict(model, fen_list):
+def batch_predict(model, fen_list, metadata_arrays):
     """
     Predict evaluation scores for multiple chess positions.
 
@@ -437,6 +461,7 @@ def batch_predict(model, fen_list):
     Args:
         model (keras.Model): Trained model
         fen_list (list): List of FEN strings
+        metadata_arrays (np.ndarray or list of lists): Array of metadata features, shape (n, 15)
 
     Returns:
         np.ndarray: Array of predicted evaluation scores
@@ -447,8 +472,8 @@ def batch_predict(model, fen_list):
     # Stack into batch array
     batch_arr = np.stack(tensors).astype('float32')
 
-    # Create secondary input
-    secondary_input = np.zeros((len(fen_list), 8), dtype='float32')
+    # Create secondary input from metadata
+    secondary_input = np.array(metadata_arrays, dtype='float32')
 
     # Make batch prediction
     predictions = model.predict([batch_arr, secondary_input], verbose=0)
@@ -458,11 +483,11 @@ def batch_predict(model, fen_list):
 
 # ------------- usage workflow ----------------
 
-def complete_workflow_example(df, fen_column, target_column):
+def complete_workflow_example(df, fen_column, target_column, metadata_columns):
     """
-    Complete example workflow from data loading to prediction.
+    Complete example workflow from data loading to prediction - FULL VERSION.
 
-    Demonstrates the full pipeline:
+    Demonstrates the full pipeline with 15 metadata features:
     1. Configuration display
     2. Data preparation
     3. Model initialization
@@ -471,15 +496,16 @@ def complete_workflow_example(df, fen_column, target_column):
     6. Prediction
 
     Args:
-        df (pd.DataFrame): Input DataFrame with chess positions and evaluations
+        df (pd.DataFrame): Input DataFrame with chess positions, evaluations, and metadata
         fen_column (str): Name of FEN column (default: 'FEN')
-        target_column (str): Name of evaluation column (default: 'Evaluation')
+        target_column (str): Name of evaluation column (default: 'Stockfish')
+        metadata_columns (list): List of 15 metadata column names
 
     Returns:
         keras.Model: Trained model ready for predictions
     """
     print("=" * 60)
-    print("CHESS POSITION EVALUATION - COMPLETE WORKFLOW")
+    print("CHESS POSITION EVALUATION - COMPLETE WORKFLOW (FULL)")
     print("=" * 60)
 
     # Step 0: Display configuration
@@ -487,31 +513,33 @@ def complete_workflow_example(df, fen_column, target_column):
 
     # Step 1: Prepare X and y from DataFrame (applies DATA_SIZE limit)
     print("\n[1/5] Preparing data...")
-    X, y = prepare_data(df, fen_column, target_column, limit_data=True)
-    print(f"  Loaded {len(X)} positions")
+    X, y = prepare_data(df, fen_column, target_column, metadata_columns, limit_data=True)
+    print(f"  Loaded {len(X)} positions with 15 metadata features")
 
     # Step 2: Initialize the model
     print("\n[2/5] Initializing model...")
-    model = initialize_model_cnn_john()
+    model = initialize_model_cnn_john_full()
     print(f"  Model created with {model.count_params():,} parameters")
     model.summary()
 
     # Step 3: Train the model
     print("\n[3/5] Training model...")
-    trained_model, history = train_model(model, X, y, fen_column)
+    trained_model, history = train_model(model, X, y, fen_column, metadata_columns)
     print(f"  Training completed in {len(history.history['loss'])} epochs")
 
     # Step 4: Evaluate the model
     print("\n[4/5] Evaluating model...")
-    evaluate_model(trained_model, X, y, fen_column)
+    evaluate_model(trained_model, X, y, fen_column, metadata_columns)
 
     # Step 5: Make predictions
     print("\n[5/5] Testing predictions...")
     sample_fen = X.iloc[0][fen_column]
-    prediction = model_predict(trained_model, sample_fen)
+    sample_metadata = X.iloc[0][metadata_columns].values
+    prediction = model_predict(trained_model, sample_fen, sample_metadata)
     actual = y.iloc[0]
     print(f"  Sample prediction:")
     print(f"    FEN: {sample_fen}")
+    print(f"    Metadata: {sample_metadata}")
     print(f"    Predicted: {prediction:.2f}")
     print(f"    Actual: {actual:.2f}")
     print(f"    Error: {abs(prediction - actual):.2f}")
