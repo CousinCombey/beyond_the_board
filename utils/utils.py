@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from beyond_the_board.params import FILES, INDEX_TO_SQUARE, MAX_FEN_LENGTH, MIN_FEN_LENGTH, PIECE_VALUES, RANKS, SQUARE_TO_INDEX
+from beyond_the_board.params import FILES, INDEX_TO_SQUARE, MAX_FEN_LENGTH, MIN_FEN_LENGTH, PIECE_VALUES, RANKS, SQUARE_TO_INDEX, RANDOM_SEED
 
 # --- Visualization functions ---
 
@@ -74,73 +74,86 @@ def plot_model_history(history):
 
 # --- Plot learning curve ---
 
-def plot_learning_curve(history, save_path=None):
+def plot_cnn_learning_curves(history, save_path=None, data_size=None, batch_size=None, max_epochs=None):
     """
-    Plot the learning curve showing training and validation metrics over epochs.
+    Plot the learning curves for the CNN model showing loss and MAE over epochs.
+
+    Specifically designed for the CNN model in cnn_john.py which tracks:
+    - loss / val_loss (Mean Squared Error)
+    - mae / val_mae (Mean Absolute Error)
 
     Parameters:
     -----------
-    history : dict or keras.callbacks.History
-        Training history containing metrics. Can be a dict with keys like 'loss', 'val_loss', etc.
-        or a Keras History object with a .history attribute.
+    history : keras.callbacks.History or dict
+        Training history returned from model.fit(). Can be either a Keras History object
+        with a .history attribute or a dict containing the metrics.
     save_path : str, optional
         If provided, saves the plot to this path instead of displaying it.
+    data_size : int, optional
+        Number of training samples used.
+    batch_size : int, optional
+        Batch size used during training.
+    max_epochs : int, optional
+        Maximum number of epochs for training.
 
     Example:
     --------
-    >>> history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50)
-    >>> plot_learning_curve(history)
+    >>> model, history = train_model(model, X, y, 'FEN')
+    >>> plot_cnn_learning_curves(history, data_size=10000, batch_size=32, max_epochs=50)
+    >>> # Or save to file:
+    >>> plot_cnn_learning_curves(history, save_path='learning_curves.png', data_size=10000, batch_size=32, max_epochs=50)
     """
-    # Handle both dict and Keras History object
+    # Handle both Keras History object and dict
     if hasattr(history, 'history'):
         history = history.history
 
-    # Determine available metrics
-    metrics = [key for key in history.keys() if not key.startswith('val_')]
+    # Extract epochs
+    epochs = range(1, len(history['loss']) + 1)
 
-    # Calculate number of subplots needed
-    n_metrics = len(metrics)
+    # Build parameter string for title
+    params_str = []
+    if data_size is not None:
+        params_str.append(f"Data: {data_size}")
+    if batch_size is not None:
+        params_str.append(f"Batch: {batch_size}")
+    if max_epochs is not None:
+        params_str.append(f"Max Epochs: {max_epochs}")
 
-    if n_metrics == 0:
-        print("No metrics found in history to plot.")
-        return
+    title_suffix = " | ".join(params_str) if params_str else ""
 
-    # Create subplots
-    _, axes = plt.subplots(1, n_metrics, figsize=(6 * n_metrics, 5))
+    # Create figure with two subplots side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
-    # Ensure axes is always a list
-    if n_metrics == 1:
-        axes = [axes]
+    # Add main title with parameters if provided
+    if title_suffix:
+        fig.suptitle(title_suffix, fontsize=11, y=0.98)
 
-    # Plot each metric
-    for idx, metric in enumerate(metrics):
-        ax = axes[idx]
+    # Plot Loss (MSE)
+    ax1.plot(epochs, history['loss'], 'b-', linewidth=2, label='Training Loss', markersize=4)
+    ax1.plot(epochs, history['val_loss'], 'r-', linewidth=2, label='Validation Loss', markersize=4)
+    ax1.set_title('Model Loss (MSE) Over Epochs', fontsize=12, fontweight='bold')
+    ax1.set_xlabel('Epoch', fontsize=11)
+    ax1.set_ylabel('Loss (MSE)', fontsize=11)
+    ax1.legend(loc='best', fontsize=10)
+    ax1.grid(True, alpha=0.3)
 
-        # Plot training metric
-        epochs = range(1, len(history[metric]) + 1)
-        ax.plot(epochs, history[metric], 'b-', linewidth=2, label=f'Training {metric}')
-
-        # Plot validation metric if available
-        val_metric = f'val_{metric}'
-        if val_metric in history:
-            ax.plot(epochs, history[val_metric], 'r-', linewidth=2, label=f'Validation {metric}')
-
-        # Formatting
-        ax.set_title(f'{metric.upper()} Learning Curve', fontsize=12, fontweight='bold')
-        ax.set_xlabel('Epoch', fontsize=10)
-        ax.set_ylabel(metric.upper(), fontsize=10)
-        ax.legend(loc='best', fontsize=9)
-        ax.grid(True, alpha=0.3)
+    # Plot MAE
+    ax2.plot(epochs, history['mae'], 'b-', linewidth=2, label='Training MAE', markersize=4)
+    ax2.plot(epochs, history['val_mae'], 'r-', linewidth=2, label='Validation MAE', markersize=4)
+    ax2.set_title('Model MAE Over Epochs', fontsize=12, fontweight='bold')
+    ax2.set_xlabel('Epoch', fontsize=11)
+    ax2.set_ylabel('MAE', fontsize=11)
+    ax2.legend(loc='best', fontsize=10)
+    ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
 
     # Save or show
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Learning curve saved to {save_path}")
+        print(f"Learning curves saved to {save_path}")
     else:
         plt.show()
-
 
 # --- End of visualization functions ---
 
