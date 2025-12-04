@@ -87,6 +87,7 @@ notebooks/*
 .parquet
 .pickle
 .h5
+.keras
 #Env variable for Docker
 .env.yaml
 .envrc
