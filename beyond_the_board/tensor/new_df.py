@@ -83,9 +83,9 @@ def create_new_df_all(df):
         all_ = pd.concat([white, black], ignore_index=True)
 
         stockfish = df[f"stockfish_{stage}"].reset_index(drop=True)
-        stockfish = pd.concat([stockfish, stockfish])
+        stockfish = pd.concat([stockfish, stockfish], ignore_index=True)
 
-        new_df_stage = pd.DataFrame({"FEN": black, "Stockfish": stockfish})
+        new_df_stage = pd.DataFrame({"FEN": all_, "Stockfish": stockfish})
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
 

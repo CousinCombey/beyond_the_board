@@ -156,17 +156,15 @@ def simulate_game(model, initial_fen):
 
     j = 0
     #loop through each move and evaluate the stockfish of the fen generated
-    while j < 40  or len_legal_moves ==0 :
+    while j < 150  or len_legal_moves ==0 :
         #initialize board at specific turn
         fen = best_fen
-        best_stockfish = model_predict(model, fen)
         board = chess.Board(fen=fen)
         len_legal_moves = len(list(board.legal_moves))
 
         # initiate empty lists
-        new_stockfishs_list = []
-        new_fens_list = []
         possible_moves = []
+        possible_fens = []
 
         for i in range(len_legal_moves) :
             # reinitialize the board on each loop otherwise the legal moves change
@@ -177,27 +175,30 @@ def simulate_game(model, initial_fen):
             move = legal_moves[i]
             board.push(move)
             new_fen = board.fen()
-            #evaluate the stockfish
-            new_stockfish = model_predict(model, new_fen)
+            # #evaluate the stockfish
+            # new_stockfish = model_predict(model, new_fen)
             #add fens & stockfish to lists
-            new_fens_list.append(new_fen)
-            new_stockfishs_list.append(new_stockfish)
             possible_moves.append(str(move))
+            possible_fens.append(new_fen)
+
+        stockfish_possible_scores = batch_predict(model, possible_fens)
 
         if " w " in fen :
-            arg_max = np.array(new_stockfishs_list).argmax()
-            best_fen = new_fens_list[arg_max]
-            best_stockfish = new_stockfishs_list[arg_max]
+
+            arg_max = stockfish_possible_scores.argmax()
+            best_fen = possible_fens[arg_max]
+            best_stockfish = stockfish_possible_scores[arg_max]
             chosen_move = possible_moves[arg_max]
             moves_list.append(chosen_move)
             who_moved = " w "
 
         elif " b " in fen :
-            arg_min = np.array(new_stockfishs_list).argmin()
-            best_fen = new_fens_list[arg_min]
-            best_stockfish = new_stockfishs_list[arg_min]
+            arg_min = stockfish_possible_scores.argmin()
+            best_fen = possible_fens[arg_min]
+            best_stockfish = stockfish_possible_scores[arg_min]
             chosen_move = possible_moves[arg_min]
             moves_list.append(chosen_move)
             to_move = " b "
         j+=1
+
     return show_moves_interactive(moves_list)
