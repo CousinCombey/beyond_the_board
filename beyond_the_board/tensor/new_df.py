@@ -27,6 +27,8 @@ def create_new_df_white(df):
 
     new_df = df_final_cut(new_df)
 
+
+
     return new_df
 
 
@@ -56,6 +58,8 @@ def create_new_df_black(df):
     new_df = df_fen_cut(new_df)
 
     new_df = df_final_cut(new_df)
+
+
 
     return new_df
 
@@ -88,6 +92,8 @@ def create_new_df_all(df):
     new_df = df_fen_cut(new_df)
 
     new_df = df_final_cut(new_df)
+
+
 
     return new_df
 
@@ -128,6 +134,21 @@ def df_final_cut(df):
     df["fullmove_norm"] = df["FEN_coup_complet"].astype(int) / 200.0
 
     return df
+
+def drop_columns(df):
+
+    columns_to_drop = [
+        "FEN",
+        "FEN_board",
+        "FEN_player",
+        "FEN_roque",
+        "FEN_passant",
+        "FEN_count_nul",
+        "FEN_coup_complet",
+        "Stockfish"
+    ]
+    return df.drop(columns=columns_to_drop)
+
 
 
 if __name__ == "__main__":
