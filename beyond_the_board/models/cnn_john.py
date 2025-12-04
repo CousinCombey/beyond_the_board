@@ -102,7 +102,7 @@ def initialize_model_cnn():
     flatten = layers.Flatten(name='flatten')(skip_3)
 
     # Secondary input: additional features (8-dimensional)
-    input_2 = Input(shape=(8,), name='input_2')
+    input_2 = Input(shape=(15,), name='input_2')
     dense_input_2 = layers.Dense(8, activation='relu', name='dense')(input_2)
 
     # Combine both inputs
