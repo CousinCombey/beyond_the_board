@@ -154,5 +154,7 @@ def drop_columns(df):
 if __name__ == "__main__":
     # Example usage
     df = pd.read_csv('chess_data.csv')  # Replace with your actual data source
-    new_df = create_new_df(df)
+    new_df = create_new_df_white(df)
+    new_df = create_new_df_black(df)
+    new_df = create_new_df_all(df)
     print(new_df.head())
