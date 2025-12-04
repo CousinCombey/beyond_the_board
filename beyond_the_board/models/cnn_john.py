@@ -520,4 +520,4 @@ def complete_workflow_example(df, fen_column, target_column):
     print("WORKFLOW COMPLETE")
     print("=" * 60)
 
-    return trained_model
+    return trained_model, history
