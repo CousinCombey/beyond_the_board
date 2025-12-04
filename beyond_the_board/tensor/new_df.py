@@ -23,6 +23,8 @@ def create_new_df_white(df):
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
 
+    new_df = df_fen_cut(new_df)
+
     return new_df
 
 
@@ -48,6 +50,8 @@ def create_new_df_black(df):
         new_df_stage = pd.DataFrame({"FEN": black, "Stockfish": stockfish})
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
+
+    new_df = df_fen_cut(new_df)
 
     return new_df
 
@@ -77,7 +81,22 @@ def create_new_df_all(df):
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
 
+    new_df = df_fen_cut(new_df)
+
     return new_df
+
+def df_fen_cut(df : df) -> df:
+
+    """Fonction qui crée 6 nouvelles colonnes dans le DataFrame
+       avec les 6 paramètre de la FEN à partir de la colonne nommée 'FEN' """
+    df['FEN_board'] = df["FEN"].apply(lambda x: x.split(" ")[0])
+    df['FEN_player'] = df["FEN"].apply(lambda x: x.split(" ")[1])
+    df['FEN_roque'] = df["FEN"].apply(lambda x: x.split(" ")[2])
+    df['FEN_passant'] = df["FEN"].apply(lambda x: x.split(" ")[3])
+    df['FEN_count_nul'] = df["FEN"].apply(lambda x: x.split(" ")[4])
+    df['FEN_coup_complet'] = df["FEN"].apply(lambda x: x.split(" ")[5])
+
+    return df
 
 
 if __name__ == "__main__":
