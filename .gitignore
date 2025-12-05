@@ -83,11 +83,11 @@ notebooks/*
 .ipynb_checkpoints
 .ipynb
 # Filenames
-.csv
-.parquet
-.pickle
-.h5
-.keras
+*.csv
+*.parquet
+*.pickle
+*.h5
+*.keras
 #Env variable for Docker
 .env.yaml
 .envrc
