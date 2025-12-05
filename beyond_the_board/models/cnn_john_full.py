@@ -483,7 +483,7 @@ def batch_predict(model, fen_list, metadata_arrays):
 
 # ------------- usage workflow ----------------
 
-def complete_workflow_example(df, fen_column, target_column, metadata_columns):
+def complete_workflow_example_full(df, fen_column, target_column, metadata_columns):
     """
     Complete example workflow from data loading to prediction - FULL VERSION.
 

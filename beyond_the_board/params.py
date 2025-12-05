@@ -1,10 +1,11 @@
+from dotenv import load_dotenv
+load_dotenv(override=True)
 import os
 import numpy as np
 from pathlib import Path
-# from dotenv import load_dotenv
 
 # Load .env file from project root
-env_path = Path(__file__).parent.parent / '.env'
+# env_path = Path(__file__).parent.parent / '.env'
 # load_dotenv(dotenv_path=env_path)
 
 ##################  VARIABLES  ##################
@@ -27,6 +28,8 @@ CLEAN_DATA_PATH = os.environ.get("CLEAN_DATA_PATH")
 DATA_WITH_FEN = os.environ.get("DATA_WITH_FEN")
 DATA_WITH_NEW_FEATURES = os.environ.get("DATA_WITH_NEW_FEATURES")
 DATA_WITH_PGN = os.environ.get("DATA_WITH_PGN")
+FINAL_DATASET = os.environ.get("FINAL_DATASET")
+DATA_MERGED = os.environ.get("FINAL_DATASET")  
 
 ################## VALIDATIONS #################
 
