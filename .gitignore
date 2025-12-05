@@ -83,11 +83,11 @@ notebooks/*
 .ipynb_checkpoints
 .ipynb
 # Filenames
-.csv
-.parquet
-.pickle
-.h5
-.keras
+*.csv
+*.parquet
+*.pickle
+*.h5
+*.keras
 #Env variable for Docker
 .env.yaml
 .envrc
@@ -97,3 +97,5 @@ app/.streamlit/secrets.toml
 outputs/models_ml
 outputs/*.zip
 outputs/
+load_model_test/
+local.txt
