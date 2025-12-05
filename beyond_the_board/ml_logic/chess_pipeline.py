@@ -10,6 +10,7 @@ from beyond_the_board.tensor.new_df import create_new_df_white, drop_columns, cr
 
 from beyond_the_board.models.cnn_john import *
 from beyond_the_board.params import *
+
 def data_and_pross(url:str):
     """ ecrire : dfw, dfb = data_and_pross(DATA_WITH_PGN) pour recuperer vos
     deux data set blanc et noir"""
@@ -31,18 +32,19 @@ def data_and_pross(url:str):
 
         return dfw, dfb
 
-    def sample_df(dfw, dfb):
+    def sample_df(dfw, dfb, n_samples=None):
 
         """Fonction qui sample 200 000 lignes du data set de base pour
         entrainer le model"""
-        dfw = dfw.sample(200000)
-        dfb = dfb.sample(200000)
+        if n_samples is not None:
+            dfw = dfw.sample(n_samples)
+            dfb = dfb.sample(n_samples)
 
-        return dfw, dfb
+            return dfw, dfb
 
     df = read_csv(url)
     dfw, dfb = create_input1(df)
-    dfw, dfb = sample_df(dfw, dfb)
+    dfw, dfb = sample_df(dfw, dfb, n_samples=200000)
 
     return dfw, dfb
 

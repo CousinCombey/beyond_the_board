@@ -17,7 +17,7 @@ def create_new_df_white(df):
 
         white = df[f"fen_{stage}_white"].reset_index(drop=True)
 
-        stockfish = df[f"stockfish_{stage}"].reset_index(drop=True)
+        stockfish = df[f"stockfish_{stage}_white"].reset_index(drop=True)
 
         new_df_stage = pd.DataFrame({"FEN": white, "Stockfish": stockfish})
 
@@ -49,7 +49,7 @@ def create_new_df_black(df):
 
         black = df[f"fen_{stage}_black"].reset_index(drop=True)
 
-        stockfish = df[f"stockfish_{stage}"].reset_index(drop=True)
+        stockfish = df[f"stockfish_{stage}_black"].reset_index(drop=True)
 
         new_df_stage = pd.DataFrame({"FEN": black, "Stockfish": stockfish})
 
@@ -82,10 +82,11 @@ def create_new_df_all(df):
         black = df[f"fen_{stage}_black"].reset_index(drop=True)
         all_ = pd.concat([white, black], ignore_index=True)
 
-        stockfish = df[f"stockfish_{stage}"].reset_index(drop=True)
-        stockfish = pd.concat([stockfish, stockfish], ignore_index=True)
+        stockfish_white = df[f"stockfish_{stage}_white"].reset_index(drop=True)
+        stockfish_black = df[f"stockfish_{stage}_black"].reset_index(drop=True)
+        stockfish_all = pd.concat([stockfish_white, stockfish_black], ignore_index=True)
 
-        new_df_stage = pd.DataFrame({"FEN": all_, "Stockfish": stockfish})
+        new_df_stage = pd.DataFrame({"FEN": all_, "Stockfish": stockfish_all})
 
         new_df = pd.concat([new_df, new_df_stage], ignore_index=True)
 
