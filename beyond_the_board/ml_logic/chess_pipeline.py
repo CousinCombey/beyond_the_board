@@ -63,3 +63,15 @@ def complete_pipeline(url:str):
     trained_model, history = pipeline(df)
 
     return trained_model, history
+
+
+def for_model_predict(fen:str):
+    """ pour transformer le fen en meta_fen """
+    fen = pd.DataFrame({"FEN" : [fen]})
+    fen = df_fen_cut_merged(fen)
+    fen = df_final_cut_merged(fen)
+    fen = drop_columns_merged(fen)
+    fen = np.array(fen)
+    fen = fen.reshape(15)
+
+    return fen
