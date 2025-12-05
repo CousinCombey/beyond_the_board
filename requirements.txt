@@ -12,3 +12,6 @@ ipykernel>=6.25.0
 chess
 seaborn
 dotenv
+google-cloud-storage
+fastapi
+uvicorn
