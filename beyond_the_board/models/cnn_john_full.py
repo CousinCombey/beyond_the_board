@@ -344,6 +344,7 @@ def train_model(model, X, y, fen_column, metadata_columns, validation_split=None
     # Prepare data for training
     X_train_inputs, _, y_train_arr, _ = clean_input_model(X, y, fen_column, metadata_columns)
 
+    print(X_train_inputs.head(3))
     # Early stopping callback: stops training when validation loss stops improving
     # restore_best_weights: restores model weights from epoch with best validation loss
     es = EarlyStopping(
