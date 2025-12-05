@@ -6,7 +6,7 @@ def new_game() -> object:
     """ initialiser un plateau de début de partie """
     return chess.Board()
 
-def fen_to_board(FEN = FEN_new_game: str) -> object:
+def fen_to_board(FEN:str) -> object:
     """ Transforme un FEN en board virtuel
     par défaut le FEN est le plateau du début de partie, au blanc de jouer"""
     return chess.Board(FEN)
