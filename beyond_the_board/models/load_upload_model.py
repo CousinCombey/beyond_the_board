@@ -1,5 +1,6 @@
 from google.cloud import storage
 import tensorflow as tf
+import os
 
 def upload_model(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -46,6 +47,9 @@ def load_model(bucket_name, source_blob_name, destination_file_name):
     bucket = storage_client.bucket(bucket_name)
     print("bucket correct")
     blob = bucket.blob(source_blob_name)
+
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(destination_file_name), exist_ok=True)
 
     # Download the model file
     blob.download_to_filename(destination_file_name)
