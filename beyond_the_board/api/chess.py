@@ -19,9 +19,8 @@ app.add_middleware(
 )
 
 bucket_name = "beyond_the_board"
-source_blob_name = "Trained Models/cnn_john_(S100B32).keras"
-destination_file_name = "~/beyond_the_board/outputs/cnn_john_(S100B32).keras"
-# path in the cintainer -- no code here -- uncomment above
+source_blob_name = "Trained Models/train_200k_mate.keras"
+destination_file_name = "/beyond_the_board/outputs/train_200k_mate.keras"
 
 app.state.model = load_model(bucket_name, source_blob_name, destination_file_name)
 @app.get("/predict")
@@ -40,11 +39,19 @@ def predict_model(fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
     """
 
-    fen_preprocssed = for_model_predict(fen)
+    fen_preprocessed = for_model_predict(fen)
 
-    prediction = model_predict(app.state.model, fen, fen_preprocssed)
+    prediction = model_predict(app.state.model, fen, fen_preprocessed)
 
-    return prediction
+        # FIX: convert numpy values to Python native types
+    if isinstance(prediction, dict):
+        return {k: float(v) for k, v in prediction.items()}
+
+    if isinstance(prediction, (list, tuple)):
+        return [float(x) for x in prediction]
+
+    # Single value (numpy.float32)
+    return float(prediction)
 
 @app.get("/")
 def root():

@@ -42,3 +42,16 @@ help:
 	@echo "  make reinstall_package    - Uninstall and reinstall package"
 	@echo "  make run_api              - Run FastAPI server for chess evaluation"
 	@echo "  make clean                - Remove Python cache files and build artifacts"
+
+##################### DOCKER #####################
+docker_build:
+	@docker build --tag=beyond_the_board .
+
+docker_run:
+	@docker run -it -e PORT=8000 -p 8000:8000 --env-file .env \
+	-v ~/code/CousinCombey/le-wagon-bootcamp-475009-c2d7ce68ab5a.json:/app/gcp-key.json \
+	-e GOOGLE_APPLICATION_CREDENTIALS=app/gcp-key.json \
+	beyond_the_board
+
+docker_running:
+	@docker ps
