@@ -448,6 +448,11 @@ def model_predict(model, fen, metadata_array):
     # Make prediction
     prediction = model.predict(model_inputs, verbose=0)
 
+    # Handle multi-output models (coach model has multiple outputs)
+    if isinstance(prediction, list):
+        # Extract first output (evaluation)
+        prediction = prediction[0]
+
     # Return scalar value (remove batch dimension)
     return prediction[0][0]
 
@@ -478,6 +483,11 @@ def batch_predict(model, fen_list, metadata_arrays):
 
     # Make batch prediction
     predictions = model.predict([batch_arr, secondary_input], verbose=0)
+
+    # Handle multi-output models (coach model has multiple outputs)
+    if isinstance(predictions, list):
+        # Extract first output (evaluation)
+        predictions = predictions[0]
 
     # Return flattened predictions
     return predictions.flatten()
