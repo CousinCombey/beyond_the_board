@@ -55,3 +55,24 @@ docker_run:
 
 docker_running:
 	@docker ps
+
+##################### ARTIFACT REGISTRY #####################
+
+docker_auth:
+	@gcloud auth configure-docker europe-west1-docker.pkg.dev
+
+docker_create_repo:
+	@gcloud artifacts repositories create beyond-the-board --repository-format=docker \
+	--location=europe-west1 --description="Repository for storing beyond_the_board images"
+
+docker_image_create:
+	@docker build \
+  --platform linux/amd64 \
+  -t europe-west1-docker.pkg.dev/le-wagon-bootcamp-475009/beyond-the-board/transformers:prod .
+
+docker_push_all:
+	@docker push europe-west1-docker.pkg.dev/le-wagon-bootcamp-475009/beyond-the-board/transformers:prod
+
+docker_launch:
+	@gcloud run deploy --image europe-west1-docker.pkg.dev/le-wagon-bootcamp-475009/beyond-the-board/\
+	transformers:prod --memory 4Gi --region europe-west1 --env-vars-file .env.yaml
