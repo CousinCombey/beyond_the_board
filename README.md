@@ -11,7 +11,6 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
-[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 </div>
 
@@ -121,9 +120,9 @@ beyond_the_board/
 │   └── chess.py        # FastAPI endpoints with auto-detection
 ├── notebooks/          # Training & analysis notebooks
 └── weights/
-    ├── coach_model.keras
-    ├── train_200k_mate.keras
-    └── improved_transformer_best.keras
+    ├── optimus_prime.keras
+    ├── shallow_blue.keras
+    └── big_brother.keras
 ```
 
 ---
