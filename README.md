@@ -30,7 +30,7 @@ The system provides real-time position analysis through a REST API, making it ea
 |-------|-------------|-----------|----------|
 | **The Coach** | ResNet (3 blocks) | Balanced evaluation | General position analysis |
 | **The Tactician** | CNN + 200k mate games | Checkmate patterns | Tactical puzzles, forced mates |
-| **The Mastermind** | Transformer | Pure positional understanding | Complex strategic positions |
+| **The Mastermind** | CNN + 100k mate games | Checkmate patterns | Complex strategic positions |
 
 Each model accepts different input formats—the API automatically detects and routes appropriately.
 
@@ -93,17 +93,6 @@ response = requests.get(f"http://localhost:8000/predict_more?fen={fen}")
 
 ### V1 Pipeline (Baseline)
 Three-step progressive training: foundation → self-play → final coach model.
-
-### V2 Pipeline (Advanced) ✅
-Enhanced architecture with MCTS self-play, Squeeze-and-Excitation attention, and alpha-beta pruning for mate search up to 6 moves.
-
-| Metric | V1 | V2 | Improvement |
-|--------|----|----|-------------|
-| Evaluation MAE | 1.76 | <1.0 | 52% better |
-| Mate-in-1 | 3.7% | 95%+ | 25x better |
-| Mate-in-2 | — | 75% | — |
-| Mate-in-3 | — | 60% | — |
-| Inference | ~100ms | 50-100ms | CPU optimized |
 
 **Key innovations:** Multi-task learning, focal loss for hard examples, temperature-based sampling, uncertainty quantification.
 
